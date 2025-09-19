@@ -1,0 +1,13 @@
+
+
+services:
+  epiko_track_db:
+    image: postgres:14.3
+    container_name: epiko_track_db
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
