@@ -4,7 +4,7 @@ import { Area } from './area.entity';
 @Entity()
 export class Board {
 
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn('increment')
     id: string;
 
     @Column({
