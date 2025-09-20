@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Role } from "./role.entity";
 
 @Entity()
 export class User {
@@ -17,7 +18,7 @@ export class User {
     lastName: string;
 
     @Column('int',{
-        nullable: true
+        nullable: true,
     })
     age: number;
 
@@ -38,23 +39,33 @@ export class User {
     updatedAt: Date;
 
     @Column('timestamp',{
-        nullable: true
+        nullable: true,
     })
     contractDate: Date;
 
-    //todo: crear idRol->Rol
-    //todo: crear idArea->Area
-
+    
     @Column({
         type: 'text',
     })
     password: string
-
-    @Column('int',{
-        default: 1
+    
+    @Column('bool',{
+        default: true,
     })
-    status : number
+    status : boolean
+    
+    @Column({
+        nullable: true,
+    })
+    job_title: string
 
+      
+    //todo: crear idRol->Rol
+    @ManyToOne(() => Role, role => role.users)
+    role: Role
+    //todo: crear idArea->Area
+
+    
     @Column('varchar')
     fullName_normalized: string
 

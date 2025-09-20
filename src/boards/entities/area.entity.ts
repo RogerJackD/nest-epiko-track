@@ -9,4 +9,5 @@ export class Area {
     nombre: string;
 
     //todo realtion to board
+    //todo relacion a user
 }
