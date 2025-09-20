@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { TaskUser } from './task-user.entity';
+import { Board } from './board.entity';
 
 export enum TypePriority {
     BAJA = 'baja',
@@ -10,8 +11,6 @@ export enum TypePriority {
 
 @Entity()
 export class Task {
-
-    //todo : cambiar uuid a int en entidad board id 
 
     @PrimaryGeneratedColumn('increment')
     id: number;
@@ -65,5 +64,9 @@ export class Task {
     //todo relacion entre task-> TaskUser
     @OneToMany(() => TaskUser, taskUser => taskUser.task)
     tasksUsers: TaskUser[]
+
+    //todo realacion entre task-> Board
+    @ManyToOne(() => Board, board => board.tasks)
+    board: Board;
 
 }

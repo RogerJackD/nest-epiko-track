@@ -1,5 +1,6 @@
-import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, Entity, Column, ManyToOne } from 'typeorm';
+import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Area } from './area.entity';
+import { Task } from './task.entity';
 
 @Entity()
 export class Board {
@@ -23,10 +24,13 @@ export class Board {
     createdAt: Date;
 
     @UpdateDateColumn({
-        type: 'timestamp'
+        type: 'timestamp',
     })
     updatedAt: Date;
 
     @ManyToOne(() => Area, area => area.boards)
-    area: Area
+    area: Area;
+
+    @OneToMany(() => Task, task => task.board)
+    tasks: Task[];
 }
