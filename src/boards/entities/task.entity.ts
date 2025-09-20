@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { TaskUser } from './task-user.entity';
 import { Board } from './board.entity';
+import { TaskStatus } from './task-status.entity';
 
 export enum TypePriority {
     BAJA = 'baja',
@@ -59,7 +60,7 @@ export class Task {
     @Column({
         default : TypePriority.BAJA
     })
-    priority: TypePriority
+    priority: TypePriority;
 
     //todo relacion entre task-> TaskUser
     @OneToMany(() => TaskUser, taskUser => taskUser.task)
@@ -69,4 +70,7 @@ export class Task {
     @ManyToOne(() => Board, board => board.tasks)
     board: Board;
 
+    //
+    @ManyToOne(() => TaskStatus, taskStatus => taskStatus.task)
+    taskStatus: TaskStatus;
 }
