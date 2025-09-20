@@ -49,17 +49,23 @@ export class User {
     @Column({
         type: 'text',
     })
-    password: string
+    password: string;
     
     @Column('bool',{
         default: true,
     })
-    status : boolean
+    status : boolean;
     
     @Column({
         nullable: true,
     })
     job_title: string
+
+    @Column('text')
+    phoneNumber: string;
+
+    @Column('text')
+    address: string;
 
     //todo crear idUsuario->TareaaUsuario 
     @OneToMany(() => TaskUser, taskUser => taskUser.user ) 

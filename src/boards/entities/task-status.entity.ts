@@ -1,6 +1,7 @@
-import { Column, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Task } from "./task.entity";
 
+@Entity()
 export class TaskStatus {
 
     @PrimaryGeneratedColumn('increment')
@@ -12,7 +13,7 @@ export class TaskStatus {
     @Column('text')
     description: string;
 
-    @Column('number')
+    @Column('int')
     sort_order: number;
 
     @OneToMany(() => Task, task => task.taskStatus)
