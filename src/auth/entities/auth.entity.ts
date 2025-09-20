@@ -1,5 +1,7 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Role } from "./role.entity";
+import { Area } from "src/boards/entities/area.entity";
+import { TaskUser } from "src/boards/entities/task-user.entity";
 
 @Entity()
 export class User {
@@ -59,12 +61,16 @@ export class User {
     })
     job_title: string
 
-      
+    //todo crear idUsuario->TareaaUsuario 
+    @OneToMany(() => TaskUser, taskUser => taskUser.user ) 
+    tasksUsers?: TaskUser[];
     //todo: crear idRol->Rol
     @ManyToOne(() => Role, role => role.users)
     role: Role
     //todo: crear idArea->Area
-
+    @ManyToOne(() => Area, area => area.users)
+    area: Area
+    
     
     @Column('varchar')
     fullName_normalized: string
