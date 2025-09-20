@@ -1,5 +1,6 @@
 import { User } from "src/auth/entities/auth.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Board } from "./board.entity";
 
 @Entity()
 export class Area {
@@ -15,6 +16,8 @@ export class Area {
 
     //todo relacion a user
     @OneToMany(() => User, user => user.area)
-    users: User[]
+    users: User[];
     //todo realtion to board
+    @OneToMany(() => Board, board => board.area)
+    boards: Board[];
 }

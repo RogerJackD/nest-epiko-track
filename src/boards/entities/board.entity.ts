@@ -1,4 +1,5 @@
-import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, Entity, Column } from 'typeorm';
+import { CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, Entity, Column, ManyToOne } from 'typeorm';
+import { Area } from './area.entity';
 
 @Entity()
 export class Board {
@@ -9,7 +10,7 @@ export class Board {
     @Column({
         type: 'text',
     })
-    name: string;
+    title: string;
 
     @Column({
         type: 'text',
@@ -26,6 +27,6 @@ export class Board {
     })
     updatedAt: Date;
 
-    //todo: crear estados para tableros
-
+    @ManyToOne(() => Area, area => area.boards)
+    area: Area
 }
