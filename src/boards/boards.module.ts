@@ -5,12 +5,13 @@ import { Board } from './entities/board.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Area } from './entities/area.entity';
 import { TaskUser } from './entities/task-user.entity';
+import { Task } from './entities/task.entity';
 
 @Module({
   controllers: [BoardsController],
   providers: [BoardsService],
   imports: [
-    TypeOrmModule.forFeature([Board, Area, TaskUser]),
+    TypeOrmModule.forFeature([Board, Area, TaskUser, Task]),
   ],
 })
 export class BoardsModule {}

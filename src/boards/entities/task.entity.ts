@@ -1,16 +1,20 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { TaskUser } from './task-user.entity';
+
+export enum TypePriority {
+    BAJA = 'baja',
+    MEDIA = 'media',
+    ALTA = 'alta',
+}
+
 
 @Entity()
 export class Task {
 
     //todo : cambiar uuid a int en entidad board id 
-    //todo analizar: en tablero colocar estados en base a sus columnas_? y relacionarlas a tasks
 
     @PrimaryGeneratedColumn('increment')
     id: number;
-
-    //todo: idUsuario = usuario asignado a la tarea uno(usuario) a muchos(tareas)
-    //userId: number;
 
     @Column({
         type: 'text',
@@ -53,8 +57,13 @@ export class Task {
     })
     updatedAt: Date;
 
-    
+    @Column({
+        default : TypePriority.BAJA
+    })
+    priority: TypePriority
 
-
+    //todo relacion entre task-> TaskUser
+    @OneToMany(() => TaskUser, taskUser => taskUser.task)
+    tasksUsers: TaskUser[]
 
 }

@@ -1,5 +1,6 @@
 import { User } from "src/auth/entities/auth.entity";
 import { CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Task } from "./task.entity";
 
 @Entity()
 export class TaskUser {
@@ -12,4 +13,7 @@ export class TaskUser {
 
     @ManyToOne(() => User, user => user.tasksUsers)
     user: User;
+
+    @ManyToOne(() => Task, task => task.tasksUsers)
+    task: Task;
 }
