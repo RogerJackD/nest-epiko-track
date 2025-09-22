@@ -9,7 +9,7 @@ export class Area {
     id: number;
 
     @Column()
-    nombre: string;
+    name: string;
 
     @Column()
     descripcion: string;
