@@ -6,7 +6,7 @@ import { Task } from './task.entity';
 export class Board {
 
     @PrimaryGeneratedColumn('increment')
-    id: string;
+    id: number;
 
     @Column({
         type: 'text',

@@ -7,6 +7,7 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
+  //todo : Gestion de Boards
   @Post()
   create(@Body() createBoardDto: CreateBoardDto) {
     return this.boardsService.create(createBoardDto);
@@ -31,4 +32,12 @@ export class BoardsController {
   remove(@Param('id') id: string) {
     return this.boardsService.remove(+id);
   }
+
+
+  //todo: Gestion de tareas
+  @Get(':boardId/tasks')
+  findAllTaskBoard(@Param('boardId') id: string){
+    return this.boardsService.getBoardWithTasks(+id)
+  }
+
 }
