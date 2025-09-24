@@ -22,10 +22,10 @@ export class AuthController {
     return this.authService.findOneUser(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateUserDto) {
-  //   return this.authService.update(+id, updateAuthDto);
-  // }
+  @Patch('users/:id')
+  updateUser(@Param('id', ParseUUIDPipe) id: string, @Body() updateAuthDto: UpdateUserDto) {
+    return this.authService.updateUser(id, updateAuthDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -39,9 +39,18 @@ export class AuthService {
     return userFound;
   }
 
-  // update(id: number, updateAuthDto: UpdateUserDto) {
-  //   const userFound = this.findOneUser(id)
-  // }
+  async updateUser(id: string, updateAuthDto: UpdateUserDto) {
+    
+    try {
+      this.findOneUser(id);
+      
+      await this.userRepository.update(id, {...updateAuthDto})
+
+    } catch (error) {
+      this.handleDbErrors(error);
+    }
+
+  }
 
   remove(id: number) {
     return `This action removes a #${id} auth`;
