@@ -29,5 +29,6 @@ export class CreateUserDto {
     address: string;
 
     @IsPhoneNumber('PE')
+    @IsOptional()
     phoneNumber: number;
 }
