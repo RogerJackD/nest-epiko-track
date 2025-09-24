@@ -40,14 +40,14 @@ export class User {
     })
     updatedAt: Date;
 
-    @Column('timestamp',{
+    @Column('date',{
         nullable: true,
     })
     contractDate: Date;
 
-    
     @Column({
         type: 'text',
+        nullable: true,
     })
     password: string;
     
@@ -61,10 +61,14 @@ export class User {
     })
     job_title: string
 
-    @Column('text')
+    @Column('text',{
+        nullable: true
+    })
     phoneNumber: string;
 
-    @Column('text')
+    @Column('text',{
+        nullable: true,
+    })
     address: string;
 
     //todo crear idUsuario->TareaaUsuario 

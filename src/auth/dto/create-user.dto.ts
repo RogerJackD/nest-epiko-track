@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsDateString, IsEmail, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateUserDto {
 
@@ -8,9 +8,26 @@ export class CreateUserDto {
     @IsString()
     lastName: string;
 
-    age: number
+    @IsOptional()
+    @IsString()
+    age: number;
 
-    email: string
+    @IsOptional()
+    @IsEmail()  
+    email: string;
 
-    contractDate: string
+    @IsDateString()
+    @IsOptional()
+    contractDate: string;
+
+    @IsOptional()
+    @IsString()
+    job_title: string;
+
+    @IsOptional()
+    @IsString()
+    address: string;
+
+    @IsPhoneNumber('PE')
+    phoneNumber: number;
 }
