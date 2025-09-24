@@ -30,5 +30,5 @@ export class CreateUserDto {
 
     @IsPhoneNumber('PE')
     @IsOptional()
-    phoneNumber: number;
+    phoneNumber: string;
 }
