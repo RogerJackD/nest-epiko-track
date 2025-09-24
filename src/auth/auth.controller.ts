@@ -12,9 +12,9 @@ export class AuthController {
     return this.authService.createUser(createAuthDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Get('users')
+  findAllUsers() {
+    return this.authService.findAllUsers();
   }
 
   @Get(':id')

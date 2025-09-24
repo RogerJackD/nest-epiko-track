@@ -24,8 +24,9 @@ export class AuthService {
     }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async findAllUsers() {
+    const UsersFound = await this.userRepository.find()
+    return UsersFound;
   }
 
   findOne(id: number) {

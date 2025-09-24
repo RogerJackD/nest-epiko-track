@@ -48,6 +48,7 @@ export class User {
     @Column({
         type: 'text',
         nullable: true,
+        select: false,
     })
     password: string;
     
