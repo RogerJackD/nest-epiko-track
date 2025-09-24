@@ -29,13 +29,19 @@ export class AuthService {
     return UsersFound;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  async findOneUser(id: string) {
+
+    const userFound = await this.userRepository.findOneBy({id})
+
+    if(!userFound){
+      throw new BadRequestException(`user with id ${id} not was found`)
+    }
+    return userFound;
   }
 
-  update(id: number, updateAuthDto: UpdateUserDto) {
-    return `This action updates a #${id} auth`;
-  }
+  // update(id: number, updateAuthDto: UpdateUserDto) {
+  //   const userFound = this.findOneUser(id)
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} auth`;
