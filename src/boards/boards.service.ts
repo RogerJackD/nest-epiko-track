@@ -102,6 +102,7 @@ export class BoardsService {
   }
 
 
+  //! completar creacion de tarea board, tiene que aceptar usuarios afiliados opcionalmente a la tarea al crear
   async createBoardTask(id: number, createTaskDto: CreateBoardDto){
     return {id, createTaskDto}
   }
