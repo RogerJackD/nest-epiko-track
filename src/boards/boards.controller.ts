@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 
 @Controller('boards')
 export class BoardsController {
@@ -36,8 +37,14 @@ export class BoardsController {
 
   //todo: Gestion de tareas
   @Get(':boardId/tasks')
-  findAllTaskBoard(@Param('boardId') id: string){
+  getBoardWithTasks(@Param('boardId') id: string){
     return this.boardsService.getBoardWithTasks(+id)
   }
+
+  @Post(':boardId/tasks')
+  createBoardTask(@Param('boardId') id: string, @Body() createTaskDto: CreateTaskDto){
+    return this.boardsService.createBoardTask(+id, createTaskDto);
+  }
+
 
 }
