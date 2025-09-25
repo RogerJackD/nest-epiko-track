@@ -33,7 +33,10 @@ export class AuthService {
 
   async findOneUser(id: string) {
 
-    const userFound = await this.userRepository.findOneBy({id})
+    const userFound = await this.userRepository.findOne({
+      where: {id},
+      relations: ['role', 'area'],
+    })
 
     if(!userFound){
       throw new BadRequestException(`user with id ${id} not was found`)
