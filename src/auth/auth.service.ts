@@ -25,7 +25,9 @@ export class AuthService {
   }
 
   async findAllUsers() {
-    const UsersFound = await this.userRepository.find()
+    const UsersFound = await this.userRepository.find({
+      relations: ['role', 'area']
+    })
     return UsersFound;
   }
 
