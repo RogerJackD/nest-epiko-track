@@ -83,7 +83,9 @@ export class User {
     area: Area
     
     
-    @Column('varchar')
+    @Column('varchar',{
+        select: false,
+    })
     fullName_normalized: string
 
     @BeforeUpdate()
