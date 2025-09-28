@@ -18,6 +18,9 @@ export class BoardsService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(TaskStatus)
     private readonly taskStatusRepository: Repository<TaskStatus>,
+
+    @InjectRepository(TaskUser)
+    private readonly taskUserRepository: Repository<TaskUser>,
   ) {}
 
   create(createBoardDto: CreateBoardDto) {
@@ -105,6 +108,24 @@ export class BoardsService {
 
   //! completar creacion de tarea board, tiene que aceptar usuarios afiliados opcionalmente a la tarea al crear
   async createBoardTask(id: number, createTaskDto: CreateTaskDto){
-    return {id, createTaskDto}
+    const { userId, ...task } = createTaskDto;
+
+    const newTask = this.taskRepository.create({
+      ...task, 
+      board: {id} 
+    });
+
+    const savedTask = await this.taskRepository.save(newTask);
+
+    if( userId ){
+      const taskUserRelation = this.taskUserRepository.create({
+        task: { id: savedTask.id },
+        user: { id: userId }
+      })
+
+      await this.taskUserRepository.save(taskUserRelation);
+    }
+    
+    return { board: id, savedTask, userId}
   }
 }
