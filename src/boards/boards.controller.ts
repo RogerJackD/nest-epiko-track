@@ -34,8 +34,12 @@ export class BoardsController {
     return this.boardsService.remove(+id);
   }
 
+  //todo : gestion de tareas:
 
-  //todo: Gestion de tareas
+  
+
+
+  //todo: Gestion de tareas con board
   @Get(':boardId/tasks')
   getBoardWithTasks(@Param('boardId') id: string){
     return this.boardsService.getBoardWithTasks(+id)

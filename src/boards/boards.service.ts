@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TaskUser } from './entities/task-user.entity';
 import { Board } from './entities/board.entity';
 import { TaskStatus } from './entities/task-status.entity';
+import { CreateTaskDto } from './dto/create-task.dto';
 
 @Injectable()
 export class BoardsService {
@@ -103,7 +104,7 @@ export class BoardsService {
 
 
   //! completar creacion de tarea board, tiene que aceptar usuarios afiliados opcionalmente a la tarea al crear
-  async createBoardTask(id: number, createTaskDto: CreateBoardDto){
+  async createBoardTask(id: number, createTaskDto: CreateTaskDto){
     return {id, createTaskDto}
   }
 }
