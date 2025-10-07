@@ -44,7 +44,7 @@ export class BoardsService {
   }
 
   //todo : Gestion de Boards tareas
-
+  //todo : las tareas deben de tener un estado por defecto al crearlos sino se pasa el estado
   async getBoardWithTasks(boardId: number) {
     // 1) Traer tareas (con sus relaciones)
     const tasks = await this.taskRepository.find({
@@ -76,10 +76,12 @@ export class BoardsService {
     // 4) Agrupar tareas por status
     const columns = tasks.reduce(
       (acc, task) => {
-        const key = statusKey(task.taskStatus.title || 'unknown');
+        //const key = statusKey(task?.taskStatus?.title || 'Sin estado');
+        const statusTitle = task.taskStatus?.title ?? 'Sin estado';
+        const key = statusKey(statusTitle);
         if (!acc[key]) {
           acc[key] = {
-            name: task.taskStatus.title,
+            name: statusTitle,
             tasks: [],
           };
         }

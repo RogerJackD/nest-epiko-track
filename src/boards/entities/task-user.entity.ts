@@ -14,6 +14,8 @@ export class TaskUser {
     @ManyToOne(() => User, user => user.tasksUsers)
     user: User;
 
-    @ManyToOne(() => Task, task => task.tasksUsers)
+    @ManyToOne(() => Task, task => task.tasksUsers, {
+        onDelete: 'CASCADE',
+    })
     task: Task;
 }

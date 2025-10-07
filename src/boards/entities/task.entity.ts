@@ -73,4 +73,7 @@ export class Task {
     //
     @ManyToOne(() => TaskStatus, taskStatus => taskStatus.task)
     taskStatus: TaskStatus;
+
+    @Column({ type: 'int', name: 'taskStatusId', default: 1 })
+    taskStatusId: number;
 }
