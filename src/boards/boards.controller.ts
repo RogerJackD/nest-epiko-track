@@ -50,5 +50,10 @@ export class BoardsController {
     return this.boardsService.createBoardTask(+id, createTaskDto);
   }
 
-
+  //todo : gestion de areas
+  //obtener tableros por area
+  @Get('area/:areaId')
+  getBoardsByArea(@Param('areaId') areaId: string){
+    return this.boardsService.getBoardsByArea(+areaId);
+  }
 }

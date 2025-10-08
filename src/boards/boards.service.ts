@@ -130,4 +130,13 @@ export class BoardsService {
     
     return { board: id, savedTask, userId}
   }
+
+  getBoardsByArea(areaId: number){
+    return this.boardRepository.find({
+      where: {
+        area: { id: areaId }
+      },
+      select: ['id', 'title', 'description']
+    })
+  }
 }
