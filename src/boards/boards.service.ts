@@ -8,6 +8,7 @@ import { TaskUser } from './entities/task-user.entity';
 import { Board } from './entities/board.entity';
 import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { start } from 'repl';
 
 @Injectable()
 export class BoardsService {
@@ -90,7 +91,10 @@ export class BoardsService {
           id: task.id,
           title: task.title,
           status: key,
-          description: task.description,
+          description: task.description, 
+          startDate: task?.startDate,
+          dueDate: task?.dueDate, 
+          priority: task?.priority,
           //position: (task as any).position ?? null, // ajusta al campo real si lo tienes
           // ...otros campos que quieras exponer
         });
