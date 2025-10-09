@@ -90,6 +90,7 @@ export class BoardsService {
           id: task.id,
           title: task.title,
           status: key,
+          description: task.description,
           //position: (task as any).position ?? null, // ajusta al campo real si lo tienes
           // ...otros campos que quieras exponer
         });
