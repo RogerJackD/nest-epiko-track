@@ -10,7 +10,7 @@ typeorm - docker - ApiRest - Postgresql - passport - class validator
 ````
 
 ## PASOS PARA EJECUTAR BACKEND
-tener: docker, node
+requisitos: docker , docker-desktop, node(v22)
 
 ```bash
 $ npm install
@@ -21,16 +21,13 @@ ejecutar archivo docker-compose.yml:
 docker-compose up -d
 ````
 
-## Compile and run the project
+## PUERTO API:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
+3030
+base URL: http://localhost:3030/api
+ejemplo POST create users: http://localhost:3030/api/auth/users
+```
+<img width="404" height="371" alt="image" src="https://github.com/user-attachments/assets/0fead9f6-1cd5-4e8e-9f49-a7493734058a" />
+
 
