@@ -9,11 +9,17 @@ typeorm - docker - ApiRest - Postgresql - passport - class validator
 
 ````
 
-## Project setup
+## PASOS PARA EJECUTAR BACKEND
+tener: docker, node
 
 ```bash
 $ npm install
 ```
+
+ejecutar archivo docker-compose.yml:
+````
+docker-compose up -d
+````
 
 ## Compile and run the project
 
