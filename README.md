@@ -16,6 +16,10 @@ requisitos: docker , docker-desktop, node(v22)
 $ npm install
 ```
 
+```variables de entorno
+renonbrar el archivo .env.template a .env
+```
+
 ejecutar archivo docker-compose.yml:
 ````
 docker-compose up -d
