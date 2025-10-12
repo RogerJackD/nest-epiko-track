@@ -25,6 +25,11 @@ ejecutar archivo docker-compose.yml:
 docker-compose up -d
 ````
 
+#ejecutar backend:
+````
+npm run start:dev
+````
+
 ## PUERTO API:
 
 ```
@@ -33,5 +38,7 @@ base URL: http://localhost:3030/api
 ejemplo POST create users: http://localhost:3030/api/auth/users
 ```
 <img width="404" height="371" alt="image" src="https://github.com/user-attachments/assets/0fead9f6-1cd5-4e8e-9f49-a7493734058a" />
+
+
 
 
