@@ -4,9 +4,9 @@ import { Board } from './board.entity';
 import { TaskStatus } from './task-status.entity';
 
 export enum TypePriority {
-    BAJA = 'baja',
-    MEDIA = 'media',
-    ALTA = 'alta',
+    BAJA = 'BAJA',
+    MEDIA = 'MEDIA',
+    ALTA = 'ALTA',
 }
 
 
