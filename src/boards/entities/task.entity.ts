@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { TaskUser } from './task-user.entity';
 import { Board } from './board.entity';
 import { TaskStatus } from './task-status.entity';
@@ -61,6 +61,12 @@ export class Task {
         default : TypePriority.BAJA
     })
     priority: TypePriority;
+
+    @DeleteDateColumn({
+        type: 'timestamp',
+        nullable: true,
+    })
+    deleteAt: Date;
 
     //todo relacion entre task-> TaskUser
     @OneToMany(() => TaskUser, taskUser => taskUser.task)
