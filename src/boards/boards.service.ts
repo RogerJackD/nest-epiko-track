@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { In, Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { Board } from './entities/board.entity';
 import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { start } from 'repl';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class BoardsService {
@@ -54,7 +55,7 @@ export class BoardsService {
         // si quieres filtrar por ids de status, cámbialo aquí:
         // taskStatus: { id: In([1, 2, 3]) }
       },
-      relations: ['taskStatus', 'board'],
+      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
       order: {
         taskStatus: { sort_order: 'ASC' }, // orden por columna
         createdAt: 'DESC', // dentro de cada columna
@@ -95,6 +96,7 @@ export class BoardsService {
           startDate: task?.startDate,
           dueDate: task?.dueDate, 
           priority: task?.priority,
+          assignedUsers: task?.tasksUsers, // si tienes relación con usuarios
           //position: (task as any).position ?? null, // ajusta al campo real si lo tienes
           // ...otros campos que quieras exponer
         });
@@ -112,6 +114,29 @@ export class BoardsService {
     };
   }
 
+  //todo TASKS
+  async findOneTask(id: number) {
+    const taskFound = await this.taskRepository.findOne({
+      where: { id },
+      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
+    });
+
+    if(!taskFound){
+      throw new BadRequestException(`Task with id ${id} not found`);
+    }
+    return taskFound;
+  }
+
+  async removeTask(id: number) {
+    await this.taskRepository.softDelete(id);
+    return { message: `Task with id ${id} has been soft deleted.` };
+  }
+
+  async updateTask(id: number, updateTaskDto: UpdateTaskDto) {
+    await this.findOneTask(id);
+    await this.taskRepository.update(id, updateTaskDto);
+    return { message: `Task with id ${id} has been updated.` };
+  }
 
   //! completar creacion de tarea board, tiene que aceptar usuarios afiliados opcionalmente a la tarea al crear
   async createBoardTask(id: number, createTaskDto: CreateTaskDto){
