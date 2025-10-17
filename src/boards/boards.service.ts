@@ -46,14 +46,11 @@ export class BoardsService {
   }
 
   //todo : Gestion de Boards tareas
-  //todo : las tareas deben de tener un estado por defecto al crearlos sino se pasa el estado
   async getBoardWithTasks(boardId: number) {
-    // 1) Traer tareas (con sus relaciones)
+    //  Traer tareas (con sus relaciones)
     const tasks = await this.taskRepository.find({
       where: {
         board: { id: boardId },
-        // si quieres filtrar por ids de status, cámbialo aquí:
-        // taskStatus: { id: In([1, 2, 3]) }
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
       order: {
@@ -62,20 +59,19 @@ export class BoardsService {
       },
     });
 
-    // 2) Traer el board (garantiza nombre incluso si no hay tareas)
+    //  Traer el board (garantiza nombre incluso si no hay tareas)
     const board = await this.boardRepository.findOne({
       where: { id: boardId },
       select: ['id', 'title'], // intenta traer title o name (ajusta según tu entidad)
     });
 
-    // 3) Helper para normalizar el key del status (ej: "En Progreso" -> "en_progreso")
+    //  Helper para normalizar el key del status (ej: "En Progreso" -> "en_progreso")
     const statusKey = (s: string) =>
       s
         .toLowerCase()
         .replace(/\s+/g, '_')
         .replace(/[^\w_]/g, '');
 
-    // 4) Agrupar tareas por status
     const columns = tasks.reduce(
       (acc, task) => {
         //const key = statusKey(task?.taskStatus?.title || 'Sin estado');
@@ -96,9 +92,7 @@ export class BoardsService {
           startDate: task?.startDate,
           dueDate: task?.dueDate, 
           priority: task?.priority,
-          assignedUsers: task?.tasksUsers, // si tienes relación con usuarios
-          //position: (task as any).position ?? null, // ajusta al campo real si lo tienes
-          // ...otros campos que quieras exponer
+          assignedUsers: task?.tasksUsers, 
         });
 
         return acc;
@@ -106,7 +100,6 @@ export class BoardsService {
       {} as Record<string, { name: string; tasks: any[] }>,
     );
 
-    // 5) Resultado final (con nombre del tablero)
     return {
       board_id: boardId,
       board_name: board?.title ?? board?.title ?? null,
@@ -133,14 +126,32 @@ export class BoardsService {
   }
 
   async updateTask(id: number, updateTaskDto: UpdateTaskDto) {
-    await this.findOneTask(id);
-    await this.taskRepository.update(id, updateTaskDto);
-    return { message: `Task with id ${id} has been updated.` };
+  await this.findOneTask(id);
+  
+  const { userIds, ...taskData } = updateTaskDto;
+
+  await this.taskRepository.update(id, taskData);
+
+  if (userIds !== undefined) {
+    await this.taskUserRepository.delete({ task: { id } });
+
+    if (userIds.length > 0) {
+      const taskUserRelations = userIds.map(userId => {
+        return this.taskUserRepository.create({
+          task: { id },
+          user: { id: userId }
+        });
+      });
+
+      await this.taskUserRepository.save(taskUserRelations);
+    }
   }
 
-  //! completar creacion de tarea board, tiene que aceptar usuarios afiliados opcionalmente a la tarea al crear
+  return { message: `Task with id ${id} has been updated.` };
+}
+
   async createBoardTask(id: number, createTaskDto: CreateTaskDto){
-    const { userId, ...task } = createTaskDto;
+    const { userIds, ...task } = createTaskDto;
 
     const newTask = this.taskRepository.create({
       ...task, 
@@ -149,16 +160,18 @@ export class BoardsService {
 
     const savedTask = await this.taskRepository.save(newTask);
 
-    if( userId ){
-      const taskUserRelation = this.taskUserRepository.create({
-        task: { id: savedTask.id },
-        user: { id: userId }
-      })
+    if( userIds && userIds.length > 0 ){
+      const taskUserRelations = userIds.map( userID => {
+        return this.taskUserRepository.create({
+          task: { id: savedTask.id },
+          user: { id: userID }
+        });
+      });
 
-      await this.taskUserRepository.save(taskUserRelation);
+      await this.taskUserRepository.save(taskUserRelations);
     }
-    
-    return { board: id, savedTask, userId}
+
+    return { board: id, savedTask, userIds };
   }
 
   getBoardsByArea(areaId: number){
