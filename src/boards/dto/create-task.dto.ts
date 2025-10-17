@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 import { TypePriority } from "../entities/task.entity";
 
 export class CreateTaskDto {
@@ -21,7 +21,8 @@ export class CreateTaskDto {
     @IsOptional()
     priority : TypePriority;
 
-    @IsUUID()
+    @IsArray()
+    @IsUUID("4", { each: true })
     @IsOptional()
-    userId: string;
+    userIds: string[];
 }
