@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskUser } from './entities/task-user.entity';
@@ -181,5 +181,22 @@ export class BoardsService {
       },
       select: ['id', 'title', 'description']
     })
+  }
+
+
+  async getUpcomingTasksByDueDate() {
+    const now = new Date();
+    console.log("hoy es:" ,now)
+    const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    return this.taskRepository.find({
+      where: {
+        dueDate: Between(now, next24Hours), // entre ahora y las próximas 24h
+      },
+      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
+      order: {
+        dueDate: 'ASC', // opcional: las más próximas primero
+      },
+    });
   }
 }

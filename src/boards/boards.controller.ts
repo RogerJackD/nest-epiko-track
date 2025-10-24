@@ -47,6 +47,11 @@ export class BoardsController {
     return this.boardsService.updateTask(+id, updateTaskDto);
   }
   
+  //todo todas las tareas proximas a vencer
+  @Get('tasks/upcoming/due-date')
+  getUpcomingTasksByDueDate() {
+    return this.boardsService.getUpcomingTasksByDueDate();
+  }
 
 
   //todo: Gestion de tareas con board
