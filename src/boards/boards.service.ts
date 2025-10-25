@@ -193,9 +193,9 @@ export class BoardsService {
       where: {
         dueDate: Between(now, next24Hours), // entre ahora y las próximas 24h
       },
-      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
+      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user', 'board.area'],
       order: {
-        dueDate: 'ASC', // opcional: las más próximas primero
+        dueDate: 'ASC', // las más próximas primero
       },
     });
   }
