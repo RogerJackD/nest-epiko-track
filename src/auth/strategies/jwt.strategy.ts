@@ -28,7 +28,10 @@ export class JwtStrategy extends PassportStrategy( Strategy ){
 
         const { id } = payload;
 
-        const user = await this.userRepository.findOneBy({ id });
+        const user = await this.userRepository.findOne({ 
+            where: { id },
+            relations: ['role']
+        });
 
         if ( !user ) 
             throw new UnauthorizedException('User not found - JWT Strategy');
