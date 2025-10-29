@@ -1,7 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RoleProtected } from './decorators/role-protected.decorator';
+import { ValidRoles } from './interfaces/valid-roles';
+import { AuthGuard } from '@nestjs/passport';
+import { UseRoleGuard } from './guards/use-role.guards';
 
 @Controller('auth')
 export class AuthController {
@@ -13,6 +18,8 @@ export class AuthController {
   }
 
   @Get('users')
+  //@RoleProtected( ValidRoles.admin)
+  //@UseGuards( AuthGuard(), UseRoleGuard)
   findAllUsers() {
     return this.authService.findAllUsers();
   }
@@ -30,5 +37,10 @@ export class AuthController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.authService.remove(+id);
+  }
+
+  @Post('login')
+  loginUser(@Body() loginUserDto: LoginUserDto) {
+    return this.authService.loginUser(loginUserDto);
   }
 }
