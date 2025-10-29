@@ -93,6 +93,10 @@ export class AuthService {
   }
 
 
+  private getJwtToken( payload: JwtPayload ){
+    const token = this.JwtService.sign( payload );
+    return token;
+  }
 
   handleDbErrors(error: any): never {
     if( error.code === '23505')
