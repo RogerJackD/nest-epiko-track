@@ -27,12 +27,9 @@ export class UseRoleGuard implements CanActivate{
 
         const req = context.switchToHttp().getRequest();
         const user = req.user as User;
-
-        for(const role of user.role.name){
-            if( ValidRoles.includes( role as ValidRoles ) ){
+        
+        if( ValidRoles.includes( user.role.name as ValidRoles ) ){
                 return true;
-            }
-
         }
 
         throw new ForbiddenException('User does not have the required roles');
