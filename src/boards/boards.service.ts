@@ -25,8 +25,11 @@ export class BoardsService {
     private readonly taskUserRepository: Repository<TaskUser>,
   ) {}
 
-  create(createBoardDto: CreateBoardDto) {
-    return 'This action adds a new board';
+  async create(createBoardDto: CreateBoardDto) {
+
+    const newBoard = this.boardRepository.create(createBoardDto);
+    return this.boardRepository.save(newBoard);
+
   }
 
   findAll() {
