@@ -12,7 +12,7 @@ export class BoardsController {
   //todo : Gestion de Boards
   @Post()
   create(@Body() createBoardDto: CreateBoardDto) {
-    return this.boardsService.create(createBoardDto);
+    return this.boardsService.createBoardByIdArea(createBoardDto);
   }
 
   @Get()
