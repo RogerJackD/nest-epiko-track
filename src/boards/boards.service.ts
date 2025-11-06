@@ -8,7 +8,6 @@ import { TaskUser } from './entities/task-user.entity';
 import { Board } from './entities/board.entity';
 import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { start } from 'repl';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
@@ -26,8 +25,11 @@ export class BoardsService {
   ) {}
 
   async createBoardByIdArea(createBoardDto: CreateBoardDto) {
-    const newBoard = this.boardRepository.create(createBoardDto);
-    return this.boardRepository.save(newBoard);
+
+    const { areaId, ...boardData } = createBoardDto;
+
+    const newBoard = this.boardRepository.create(boardData);
+    return this.boardRepository.save({ ...newBoard, area: { id: areaId } });
 
   }
 
