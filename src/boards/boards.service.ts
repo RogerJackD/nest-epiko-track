@@ -9,6 +9,7 @@ import { Board } from './entities/board.entity';
 import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Area } from './entities/area.entity';
 
 @Injectable()
 export class BoardsService {
@@ -20,6 +21,8 @@ export class BoardsService {
     @InjectRepository(TaskStatus)
     private readonly taskStatusRepository: Repository<TaskStatus>,
 
+    @InjectRepository(Area)
+    private readonly areaRepository: Repository<Area>,
     @InjectRepository(TaskUser)
     private readonly taskUserRepository: Repository<TaskUser>,
   ) {}
@@ -180,7 +183,13 @@ export class BoardsService {
     return { board: id, savedTask, userIds };
   }
 
-  getBoardsByArea(areaId: number){
+
+  async getAllAreas(){
+    const areas = await this.areaRepository.find();
+    return areas;
+  }
+
+  async getBoardsByArea(areaId: number){
     return this.boardRepository.find({
       where: {
         area: { id: areaId }
