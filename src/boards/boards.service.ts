@@ -33,8 +33,10 @@ export class BoardsService {
 
   }
 
-  findAll() {
-    return `This action returns all boards`;
+  findAllBoards() {
+    return this.boardRepository.find({
+      relations: ['area'],
+    });
   }
 
   findOne(id: number) {
