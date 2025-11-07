@@ -20,11 +20,6 @@ export class BoardsController {
     return this.boardsService.findAllBoards();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boardsService.findOne(+id);
-  }
-
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
     return this.boardsService.update(+id, updateBoardDto);
@@ -66,11 +61,16 @@ export class BoardsController {
   }
 
   //todo : gestion de areas
+
+  @Get('/areas')
+  getAllAreas(){
+    return this.boardsService.getAllAreas();
+  }
+
   //obtener tableros por area
   @Get('area/:areaId')
   getBoardsByArea(@Param('areaId') areaId: string){
     return this.boardsService.getBoardsByArea(+areaId);
   }
-
 
 }
