@@ -46,8 +46,16 @@ export class BoardsService {
     return `This action returns a #${id} board`;
   }
 
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  updateBoard(id: number, updateBoardDto: UpdateBoardDto) {
+
+    const { areaId, ...boardData } = updateBoardDto;
+
+    const updatedBoard = this.boardRepository.create({
+      id,
+      ...boardData
+    });
+
+    return this.boardRepository.save(updatedBoard);
   }
 
   remove(id: number) {
