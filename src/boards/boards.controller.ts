@@ -22,7 +22,7 @@ export class BoardsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardsService.update(+id, updateBoardDto);
+    return this.boardsService.updateBoard(+id, updateBoardDto);
   }
 
   @Delete(':id')
