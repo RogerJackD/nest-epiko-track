@@ -17,7 +17,7 @@ export class BoardsController {
 
   @Get()
   findAll() {
-    return this.boardsService.findAll();
+    return this.boardsService.findAllBoards();
   }
 
   @Get(':id')
