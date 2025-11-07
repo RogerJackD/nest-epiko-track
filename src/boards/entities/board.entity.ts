@@ -18,6 +18,12 @@ export class Board {
     })
     description: string;
 
+    @Column({
+        type: 'boolean',
+        default: true,
+    })
+    isActive: boolean;
+
     @CreateDateColumn({
         type: 'timestamp'
     })
