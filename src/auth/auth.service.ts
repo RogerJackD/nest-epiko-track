@@ -19,8 +19,10 @@ export class AuthService {
 
   async createUser(createUserDto: CreateUserDto) {
 
+    const { areaId, ...userData } = createUserDto;
+
     try {
-      const newUser = this.userRepository.create(createUserDto);
+      const newUser = this.userRepository.create({ ...userData, area: { id: areaId } });
       await this.userRepository.save(newUser);
       return newUser
     } catch (error) {
@@ -47,18 +49,16 @@ export class AuthService {
     }
     return userFound;
   }
-
-  async updateUser(id: string, updateAuthDto: UpdateUserDto) {
+  
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
     
-    try {
-      this.findOneUser(id);
-      
-      await this.userRepository.update(id, {...updateAuthDto})
+    await this.findOneUser(id);
 
-    } catch (error) {
-      this.handleDbErrors(error);
-    }
-
+    await this.userRepository.update(id, {...updateUserDto})
+    return {
+      message: 'Usuario actualizado exitosamente',
+      success: true
+    };
   }
 
   remove(id: number) {
