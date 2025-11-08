@@ -81,6 +81,13 @@ export class User {
     //todo: crear idArea->Area
     @ManyToOne(() => Area, area => area.users)
     area: Area
+
+    @Column({
+        type: 'int',
+        nullable: true,
+        default: 1, 
+    })
+    roleId: number | null;
     
     
     @Column('varchar',{
