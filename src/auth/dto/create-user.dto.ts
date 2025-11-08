@@ -12,8 +12,7 @@ export class CreateUserDto {
     @IsNumber()
     age: number;
 
-    @IsOptional()
-    @IsEmail()  
+    @IsEmail()
     email: string;
 
     @IsDateString()
@@ -32,10 +31,12 @@ export class CreateUserDto {
     @IsOptional()
     phoneNumber: string;
 
+    @IsNumber()
+    areaId: number;
+
     @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
       'The password must have a Uppercase, lowercase letter and a number',
     })
     password: string;
-    
 }
