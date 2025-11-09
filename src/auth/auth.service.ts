@@ -54,7 +54,9 @@ export class AuthService {
     
     await this.findOneUser(id);
 
-    await this.userRepository.update(id, {...updateUserDto})
+    const { areaId, ...userData } = updateUserDto;
+
+    await this.userRepository.update(id, {...userData, area: { id: areaId }})
     return {
       message: 'Usuario actualizado exitosamente',
       success: true
