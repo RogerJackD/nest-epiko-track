@@ -7,12 +7,14 @@ import { Area } from './entities/area.entity';
 import { TaskUser } from './entities/task-user.entity';
 import { Task } from './entities/task.entity';
 import { TaskStatus } from './entities/task-status.entity';
+import { BoardsWsModule } from 'src/boards-ws/boards-ws.module';
 
 @Module({
   controllers: [BoardsController],
   providers: [BoardsService],
   imports: [
     TypeOrmModule.forFeature([Board, Area, TaskUser, Task, TaskStatus]),
+    BoardsWsModule
   ],
 })
 export class BoardsModule {}

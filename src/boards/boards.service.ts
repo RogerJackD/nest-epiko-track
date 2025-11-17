@@ -1,3 +1,4 @@
+// boards/boards.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -10,6 +11,7 @@ import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Area } from './entities/area.entity';
+import { BoardsWsGateway } from '../boards-ws/boards-ws.gateway'; 
 
 @Injectable()
 export class BoardsService {
@@ -20,20 +22,17 @@ export class BoardsService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(TaskStatus)
     private readonly taskStatusRepository: Repository<TaskStatus>,
-
     @InjectRepository(Area)
     private readonly areaRepository: Repository<Area>,
     @InjectRepository(TaskUser)
     private readonly taskUserRepository: Repository<TaskUser>,
+    private readonly boardsWsGateway: BoardsWsGateway, 
   ) {}
 
   async createBoardByIdArea(createBoardDto: CreateBoardDto) {
-
     const { areaId, ...boardData } = createBoardDto;
-
     const newBoard = this.boardRepository.create(boardData);
     return this.boardRepository.save({ ...newBoard, area: { id: areaId } });
-
   }
 
   findAllBoards() {
@@ -47,14 +46,11 @@ export class BoardsService {
   }
 
   updateBoard(id: number, updateBoardDto: UpdateBoardDto) {
-
     const { areaId, ...boardData } = updateBoardDto;
-
     const updatedBoard = this.boardRepository.create({
       id,
       ...boardData
     });
-
     return this.boardRepository.save(updatedBoard);
   }
 
@@ -62,27 +58,23 @@ export class BoardsService {
     return `This action removes a #${id} board`;
   }
 
-  //todo : Gestion de Boards tareas
   async getBoardWithTasks(boardId: number) {
-    //  Traer tareas (con sus relaciones)
     const tasks = await this.taskRepository.find({
       where: {
         board: { id: boardId },
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
       order: {
-        taskStatus: { sort_order: 'ASC' }, // orden por columna
-        createdAt: 'DESC', // dentro de cada columna
+        taskStatus: { sort_order: 'ASC' },
+        createdAt: 'DESC',
       },
     });
 
-    //  Traer el board (garantiza nombre incluso si no hay tareas)
     const board = await this.boardRepository.findOne({
       where: { id: boardId },
-      select: ['id', 'title'], // intenta traer title o name (ajusta según tu entidad)
+      select: ['id', 'title'],
     });
 
-    //  Helper para normalizar el key del status (ej: "En Progreso" -> "en_progreso")
     const statusKey = (s: string) =>
       s
         .toLowerCase()
@@ -91,7 +83,6 @@ export class BoardsService {
 
     const columns = tasks.reduce(
       (acc, task) => {
-        //const key = statusKey(task?.taskStatus?.title || 'Sin estado');
         const statusTitle = task.taskStatus?.title ?? 'Sin estado';
         const key = statusKey(statusTitle);
         if (!acc[key]) {
@@ -124,7 +115,6 @@ export class BoardsService {
     };
   }
 
-  //todo TASKS
   async findOneTask(id: number) {
     const taskFound = await this.taskRepository.findOne({
       where: { id },
@@ -138,34 +128,77 @@ export class BoardsService {
   }
 
   async removeTask(id: number) {
-    await this.taskRepository.softDelete(id);
+
+    const task = await this.taskRepository.findOne({
+      where: { id },
+      relations: ['tasksUsers', 'tasksUsers.user'],
+    });
+
+    if (task) {
+      const userIds = task.tasksUsers.map(tu => tu.user.id);
+      
+      await this.taskRepository.softDelete(id);
+
+      // notificar eliminación
+      if (userIds.length > 0) {
+        this.boardsWsGateway.notifyTaskDeleted(userIds, id);
+        console.log(`📤 Notificación de eliminación enviada a ${userIds.length} usuarios`);
+      }
+    }
+
     return { message: `Task with id ${id} has been soft deleted.` };
   }
 
   async updateTask(id: number, updateTaskDto: UpdateTaskDto) {
-  await this.findOneTask(id);
-  
-  const { userIds, ...taskData } = updateTaskDto;
+   
+    const previousTask = await this.taskRepository.findOne({
+      where: { id },
+      relations: ['tasksUsers', 'tasksUsers.user'],
+    });
 
-  await this.taskRepository.update(id, taskData);
+    await this.findOneTask(id);
+    
+    const { userIds, ...taskData } = updateTaskDto;
 
-  if (userIds !== undefined) {
-    await this.taskUserRepository.delete({ task: { id } });
+    await this.taskRepository.update(id, taskData);
 
-    if (userIds.length > 0) {
-      const taskUserRelations = userIds.map(userId => {
-        return this.taskUserRepository.create({
-          task: { id },
-          user: { id: userId }
+    if (userIds !== undefined) {
+      await this.taskUserRepository.delete({ task: { id } });
+
+      if (userIds.length > 0) {
+        const taskUserRelations = userIds.map(userId => {
+          return this.taskUserRepository.create({
+            task: { id },
+            user: { id: userId }
+          });
         });
-      });
 
-      await this.taskUserRepository.save(taskUserRelations);
+        await this.taskUserRepository.save(taskUserRelations);
+      }
     }
-  }
 
-  return { message: `Task with id ${id} has been updated.` };
-}
+    
+    const updatedTask = await this.taskRepository.findOne({
+      where: { id },
+      relations: ['tasksUsers', 'tasksUsers.user', 'board', 'board.area', 'taskStatus'],
+    });
+
+    
+    if (updatedTask) {
+      const previousUserIds = previousTask?.tasksUsers.map(tu => tu.user.id) || [];
+      const newUserIds = updatedTask.tasksUsers.map(tu => tu.user.id);
+      const allUserIds = [...new Set([...previousUserIds, ...newUserIds])];
+
+      if (allUserIds.length > 0) {
+        allUserIds.forEach(userId => {
+          this.boardsWsGateway.notifyTaskUpdate(userId, updatedTask);
+        });
+        console.log(`📤 Notificación de actualización enviada a ${allUserIds.length} usuarios`);
+      }
+    }
+
+    return { message: `Task with id ${id} has been updated.` };
+  }
 
   async createBoardTask(id: number, createTaskDto: CreateTaskDto){
     const { userIds, ...task } = createTaskDto;
@@ -188,9 +221,20 @@ export class BoardsService {
       await this.taskUserRepository.save(taskUserRelations);
     }
 
+   
+    const completeTask = await this.taskRepository.findOne({
+      where: { id: savedTask.id },
+      relations: ['tasksUsers', 'tasksUsers.user', 'board', 'board.area', 'taskStatus'],
+    });
+
+    
+    if (completeTask && userIds && userIds.length > 0) {
+      this.boardsWsGateway.notifyNewTask(userIds, completeTask);
+      console.log(`📤 Notificación de nueva tarea enviada a ${userIds.length} usuarios`);
+    }
+
     return { board: id, savedTask, userIds };
   }
-
 
   async getAllAreas(){
     const areas = await this.areaRepository.find();
@@ -206,7 +250,6 @@ export class BoardsService {
     })
   }
 
-
   async getUpcomingTasksByDueDate() {
     const now = new Date();
     console.log("hoy es:" ,now)
@@ -214,11 +257,11 @@ export class BoardsService {
 
     return this.taskRepository.find({
       where: {
-        dueDate: Between(now, next24Hours), // entre ahora y las próximas 24h
+        dueDate: Between(now, next24Hours),
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user', 'board.area'],
       order: {
-        dueDate: 'ASC', // las más próximas primero
+        dueDate: 'ASC',
       },
     });
   }

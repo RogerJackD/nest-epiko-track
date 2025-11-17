@@ -1,3 +1,4 @@
+// boards-ws/boards-ws.module.ts
 import { Module } from '@nestjs/common';
 import { BoardsWsService } from './boards-ws.service';
 import { BoardsWsGateway } from './boards-ws.gateway';
@@ -11,6 +12,6 @@ import { User } from 'src/auth/entities/auth.entity';
     TypeOrmModule.forFeature([Task, TaskUser, User]),
   ],
   providers: [BoardsWsGateway, BoardsWsService],
-  exports: [BoardsWsService],
+  exports: [BoardsWsService, BoardsWsGateway], 
 })
 export class BoardsWsModule {}
