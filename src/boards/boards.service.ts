@@ -1,4 +1,3 @@
-// boards/boards.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -142,7 +141,7 @@ export class BoardsService {
       // notificar eliminación
       if (userIds.length > 0) {
         this.boardsWsGateway.notifyTaskDeleted(userIds, id);
-        console.log(`📤 Notificación de eliminación enviada a ${userIds.length} usuarios`);
+        console.log(`Notificación de eliminación enviada a ${userIds.length} usuarios`);
       }
     }
 

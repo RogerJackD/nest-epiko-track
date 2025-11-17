@@ -63,7 +63,7 @@ export class BoardsWsService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      console.error(`❌ Error en getTasksByBoard para tablero ${boardId}:`, error.message);
+      console.error(`Error en getTasksByBoard para tablero ${boardId}:`, error.message);
       throw error;
     }
   }
@@ -76,7 +76,7 @@ export class BoardsWsService {
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
-      console.error('❌ Error en getAllActiveTasks:', error.message);
+      console.error('Error en getAllActiveTasks:', error.message);
       throw error;
     }
   }
