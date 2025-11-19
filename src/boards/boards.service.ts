@@ -58,9 +58,10 @@ export class BoardsService {
   }
 
   async getBoardWithTasks(boardId: number) {
+    // Asegurarse de que el tablero está activo
     const tasks = await this.taskRepository.find({
       where: {
-        board: { id: boardId },
+        board: { id: boardId, isActive: true },
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
       order: {
@@ -68,9 +69,9 @@ export class BoardsService {
         createdAt: 'DESC',
       },
     });
-
+    // Asegurarse de que el tablero está activo
     const board = await this.boardRepository.findOne({
-      where: { id: boardId },
+      where: { id: boardId, isActive: true },
       select: ['id', 'title'],
     });
 
@@ -243,6 +244,7 @@ export class BoardsService {
   async getBoardsByArea(areaId: number){
     return this.boardRepository.find({
       where: {
+        isActive: true,
         area: { id: areaId }
       },
       select: ['id', 'title', 'description']
