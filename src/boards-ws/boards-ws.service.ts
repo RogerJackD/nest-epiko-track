@@ -28,6 +28,7 @@ export class BoardsWsService {
         throw new Error(`Usuario con ID ${userId} no encontrado`);
       }
 
+      //solo tareas que pertencen a un tablero board.isActive = true
       // Método 1: Usar QueryBuilder (más robusto)
       const tasks = await this.taskRepository
         .createQueryBuilder('task')
@@ -40,6 +41,7 @@ export class BoardsWsService {
         .leftJoinAndSelect('task.taskStatus', 'taskStatus')
         .where('assignedUser.id = :userId', { userId })
         .andWhere('task.deleteAt IS NULL')
+        .andWhere('board.isActive = :isActive', { isActive: true })
         .orderBy('task.createdAt', 'DESC')
         .getMany();
 
