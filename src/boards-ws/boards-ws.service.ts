@@ -1,10 +1,11 @@
 // boards-ws/boards-ws.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, In } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { Task } from '../boards/entities/task.entity';
 import { TaskUser } from '../boards/entities/task-user.entity';
 import { User } from '../auth/entities/auth.entity';
+import { Board } from '../boards/entities/board.entity';
 
 @Injectable()
 export class BoardsWsService {
@@ -15,11 +16,12 @@ export class BoardsWsService {
     private readonly taskUserRepository: Repository<TaskUser>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Board)
+    private readonly boardRepository: Repository<Board>,
   ) {}
 
   async getUserTasks(userId: string): Promise<Task[]> {
     try {
-      // Verificar que el usuario existe
       const user = await this.userRepository.findOne({
         where: { id: userId },
       });
@@ -28,8 +30,6 @@ export class BoardsWsService {
         throw new Error(`Usuario con ID ${userId} no encontrado`);
       }
 
-      //solo tareas que pertencen a un tablero board.isActive = true
-      // Método 1: Usar QueryBuilder (más robusto)
       const tasks = await this.taskRepository
         .createQueryBuilder('task')
         .innerJoin('task.tasksUsers', 'taskUser')
@@ -79,6 +79,88 @@ export class BoardsWsService {
       });
     } catch (error) {
       console.error('Error en getAllActiveTasks:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * ✨ NUEVO: Obtener datos del tablero en formato Kanban para WebSocket
+   * Replica la estructura de getBoardWithTasks del BoardsService
+   */
+  async getBoardWithTasksForSocket(boardId: number) {
+    try {
+      console.log(`📊 Obteniendo tareas para tablero ${boardId}...`);
+
+      const tasks = await this.taskRepository.find({
+        where: {
+          board: { id: boardId, isActive: true },
+          deleteAt: IsNull(),
+        },
+        relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
+        order: {
+          taskStatus: { sort_order: 'ASC' },
+          createdAt: 'DESC',
+        },
+      });
+
+      console.log(`📋 Tareas encontradas: ${tasks.length}`);
+
+      const board = await this.boardRepository.findOne({
+        where: { id: boardId, isActive: true },
+        select: ['id', 'title'],
+      });
+
+      console.log(`🏢 Tablero encontrado:`, board);
+
+      if (!board) {
+        throw new Error(`Tablero con ID ${boardId} no encontrado o inactivo`);
+      }
+
+      const statusKey = (s: string) =>
+        s
+          .toLowerCase()
+          .replace(/\s+/g, '_')
+          .replace(/[^\w_]/g, '');
+
+      const columns = tasks.reduce(
+        (acc, task) => {
+          const statusTitle = task.taskStatus?.title ?? 'Sin estado';
+          const key = statusKey(statusTitle);
+          if (!acc[key]) {
+            acc[key] = {
+              name: statusTitle,
+              tasks: [],
+            };
+          }
+
+          acc[key].tasks.push({
+            id: task.id,
+            title: task.title,
+            status: key,
+            description: task.description,
+            startDate: task?.startDate,
+            dueDate: task?.dueDate,
+            priority: task?.priority,
+            assignedUsers: task?.tasksUsers,
+          });
+
+          return acc;
+        },
+        {} as Record<string, { name: string; tasks: any[] }>,
+      );
+
+      const result = {
+        board_id: boardId,
+        board_name: board?.title ?? null,
+        columns,
+      };
+
+      console.log(`✅ Resultado generado:`, JSON.stringify(result, null, 2));
+
+      return result;
+    } catch (error) {
+      console.error(`❌ Error en getBoardWithTasksForSocket para tablero ${boardId}:`, error.message);
+      console.error(`Stack:`, error.stack);
       throw error;
     }
   }
