@@ -1,4 +1,3 @@
-// boards-ws/boards-ws.gateway.ts
 import {
   WebSocketGateway,
   SubscribeMessage,
@@ -37,9 +36,65 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   /**
+   * ✨ NUEVO: Evento para suscribirse a un tablero específico
+   * Los clientes se unen a una sala por boardId para recibir actualizaciones en tiempo real
+   */
+  @SubscribeMessage('subscribe-board')
+  async handleSubscribeBoard(
+    @MessageBody() data: { boardId: number; userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { boardId, userId } = data;
+
+    try {
+      // Guardar relación socket-usuario
+      this.connectedClients.set(client.id, userId);
+
+      // Unir cliente a la sala del tablero
+      client.join(`board-${boardId}`);
+
+      this.logger.log(`Usuario ${userId} se suscribió al tablero ${boardId}`);
+
+      // Obtener datos iniciales del tablero
+      const boardData = await this.boardsWsService.getBoardWithTasksForSocket(boardId);
+
+      this.logger.log(`📦 Datos del tablero obtenidos:`, JSON.stringify(boardData));
+
+      // ✨ CRÍTICO: Emitir directamente al cliente, no usar return
+      client.emit('board-data', {
+        boardId,
+        ...boardData,
+        timestamp: new Date().toISOString(),
+      });
+
+      this.logger.log(`✅ Datos iniciales enviados al cliente ${client.id} para tablero ${boardId}`);
+
+    } catch (error) {
+      this.logger.error(`❌ Error al suscribir al tablero ${boardId}:`, error.message);
+      this.logger.error(`Stack trace:`, error.stack);
+      
+      client.emit('error', {
+        message: error.message,
+        boardId,
+      });
+    }
+  }
+
+  /**
+   * ✨ NUEVO: Desuscribirse de un tablero
+   */
+  @SubscribeMessage('unsubscribe-board')
+  handleUnsubscribeBoard(
+    @MessageBody() data: { boardId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { boardId } = data;
+    client.leave(`board-${boardId}`);
+    this.logger.log(`Cliente ${client.id} se desuscribió del tablero ${boardId}`);
+  }
+
+  /**
    * Evento para que el cliente se suscriba a las tareas de un usuario específico
-   * @param userId - UUID del usuario
-   * @param client - Socket del cliente conectado
    */
   @SubscribeMessage('subscribe-user-tasks')
   async handleSubscribeUserTasks(
@@ -49,18 +104,13 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
     const { userId } = data;
 
     try {
-      // Guardar la relación socket-usuario
       this.connectedClients.set(client.id, userId);
-
-      // Hacer que el cliente se una a una sala específica del usuario
       client.join(`user-${userId}`);
 
-      // Obtener las tareas del usuario
       const tasks = await this.boardsWsService.getUserTasks(userId);
 
       this.logger.log(`Usuario ${userId} suscrito. Tareas encontradas: ${tasks.length}`);
 
-      // Enviar las tareas iniciales al cliente
       return {
         event: 'user-tasks',
         data: {
@@ -83,7 +133,6 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /**
    * Evento para obtener tareas de un usuario sin suscribirse
-   * @param userId - UUID del usuario
    */
   @SubscribeMessage('get-user-tasks')
   async handleGetUserTasks(@MessageBody() data: { userId: string }) {
@@ -116,7 +165,6 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /**
    * Evento para obtener todas las tareas de un tablero
-   * @param boardId - ID del tablero
    */
   @SubscribeMessage('get-board-tasks')
   async handleGetBoardTasks(@MessageBody() data: { boardId: number }) {
@@ -147,9 +195,38 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
   }
 
+  // ============================================
+  // 🚀 MÉTODOS PARA NOTIFICACIONES EN TIEMPO REAL
+  // ============================================
+
+  /**
+   * ✨ NUEVO: Notificar cambios completos del tablero a todos los usuarios conectados
+   * Este es el método principal para mantener sincronizado el Kanban
+   */
+  async notifyBoardChange(boardId: number) {
+    try {
+      this.logger.log(`🔄 Iniciando notificación de cambios para tablero ${boardId}...`);
+      
+      const boardData = await this.boardsWsService.getBoardWithTasksForSocket(boardId);
+      
+      this.logger.log(`📦 Datos obtenidos, emitiendo a sala board-${boardId}...`);
+      
+      this.server.to(`board-${boardId}`).emit('board-updated', {
+        boardId,
+        ...boardData,
+        timestamp: new Date().toISOString(),
+      });
+
+      this.logger.log(`✅ Tablero ${boardId} actualizado para todos los clientes suscritos`);
+    } catch (error) {
+      this.logger.error(`❌ Error al notificar cambios del tablero ${boardId}:`, error.message);
+      this.logger.error(`Stack:`, error.stack);
+    }
+  }
+
   /**
    * Método para notificar cambios en tareas a usuarios específicos
-   * Se puede llamar desde otros servicios cuando se actualice una tarea
+   * (MANTENER para las notificaciones de usuario)
    */
   notifyTaskUpdate(userId: string, task: any) {
     this.server.to(`user-${userId}`).emit('task-updated', {
@@ -159,18 +236,8 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   /**
-   * Método para notificar a todos los usuarios de un tablero
-   */
-  notifyBoardUpdate(boardId: number, tasks: any[]) {
-    this.server.to(`board-${boardId}`).emit('board-updated', {
-      boardId,
-      tasks,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
    * Método para notificar cuando se crea una nueva tarea
+   * (MANTENER para las notificaciones de usuario)
    */
   notifyNewTask(userIds: string[], task: any) {
     userIds.forEach((userId) => {
@@ -183,6 +250,7 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /**
    * Método para notificar cuando se elimina una tarea
+   * (MANTENER para las notificaciones de usuario)
    */
   notifyTaskDeleted(userIds: string[], taskId: number) {
     userIds.forEach((userId) => {
