@@ -6,12 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from 'src/boards/entities/task.entity';
 import { TaskUser } from 'src/boards/entities/task-user.entity';
 import { User } from 'src/auth/entities/auth.entity';
+import { Board } from 'src/boards/entities/board.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Task, TaskUser, User]),
+    TypeOrmModule.forFeature([Task, TaskUser, User, Board]),
   ],
   providers: [BoardsWsGateway, BoardsWsService],
-  exports: [BoardsWsService, BoardsWsGateway], 
+  exports: [BoardsWsService, BoardsWsGateway, BoardsWsModule], 
 })
 export class BoardsWsModule {}
