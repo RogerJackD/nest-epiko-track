@@ -1,7 +1,8 @@
+// boards/boards.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskUser } from './entities/task-user.entity';
@@ -10,7 +11,7 @@ import { TaskStatus } from './entities/task-status.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Area } from './entities/area.entity';
-import { BoardsWsGateway } from '../boards-ws/boards-ws.gateway'; 
+import { BoardsWsGateway } from '../boards-ws/boards-ws.gateway';
 
 @Injectable()
 export class BoardsService {
@@ -25,7 +26,7 @@ export class BoardsService {
     private readonly areaRepository: Repository<Area>,
     @InjectRepository(TaskUser)
     private readonly taskUserRepository: Repository<TaskUser>,
-    private readonly boardsWsGateway: BoardsWsGateway, 
+    private readonly boardsWsGateway: BoardsWsGateway,
   ) {}
 
   async createBoardByIdArea(createBoardDto: CreateBoardDto) {
@@ -58,7 +59,6 @@ export class BoardsService {
   }
 
   async getBoardWithTasks(boardId: number) {
-    // Asegurarse de que el tablero está activo
     const tasks = await this.taskRepository.find({
       where: {
         board: { id: boardId, isActive: true },
@@ -69,7 +69,7 @@ export class BoardsService {
         createdAt: 'DESC',
       },
     });
-    // Asegurarse de que el tablero está activo
+
     const board = await this.boardRepository.findOne({
       where: { id: boardId, isActive: true },
       select: ['id', 'title'],
@@ -96,11 +96,11 @@ export class BoardsService {
           id: task.id,
           title: task.title,
           status: key,
-          description: task.description, 
+          description: task.description,
           startDate: task?.startDate,
-          dueDate: task?.dueDate, 
+          dueDate: task?.dueDate,
           priority: task?.priority,
-          assignedUsers: task?.tasksUsers, 
+          assignedUsers: task?.tasksUsers,
         });
 
         return acc;
@@ -121,43 +121,48 @@ export class BoardsService {
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user'],
     });
 
-    if(!taskFound){
+    if (!taskFound) {
       throw new BadRequestException(`Task with id ${id} not found`);
     }
     return taskFound;
   }
 
   async removeTask(id: number) {
-
     const task = await this.taskRepository.findOne({
       where: { id },
-      relations: ['tasksUsers', 'tasksUsers.user'],
+      relations: ['tasksUsers', 'tasksUsers.user', 'board'],
     });
 
     if (task) {
       const userIds = task.tasksUsers.map(tu => tu.user.id);
-      
+      const boardId = task.board.id;
+
       await this.taskRepository.softDelete(id);
 
-      // notificar eliminación
+      // ✨ Notificar eliminación a usuarios asignados (para notificaciones personales)
       if (userIds.length > 0) {
         this.boardsWsGateway.notifyTaskDeleted(userIds, id);
-        console.log(`Notificación de eliminación enviada a ${userIds.length} usuarios`);
+        console.log(`📤 Notificación de eliminación enviada a ${userIds.length} usuarios`);
       }
+
+      // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
+      setTimeout(async () => {
+        await this.boardsWsGateway.notifyBoardChange(boardId);
+        console.log(`🔄 Tablero ${boardId} sincronizado después de eliminar tarea ${id}`);
+      }, 100);
     }
 
     return { message: `Task with id ${id} has been soft deleted.` };
   }
 
   async updateTask(id: number, updateTaskDto: UpdateTaskDto) {
-   
     const previousTask = await this.taskRepository.findOne({
       where: { id },
-      relations: ['tasksUsers', 'tasksUsers.user'],
+      relations: ['tasksUsers', 'tasksUsers.user', 'board'],
     });
 
     await this.findOneTask(id);
-    
+
     const { userIds, ...taskData } = updateTaskDto;
 
     await this.taskRepository.update(id, taskData);
@@ -177,41 +182,47 @@ export class BoardsService {
       }
     }
 
-    
     const updatedTask = await this.taskRepository.findOne({
       where: { id },
       relations: ['tasksUsers', 'tasksUsers.user', 'board', 'board.area', 'taskStatus'],
     });
 
-    
     if (updatedTask) {
       const previousUserIds = previousTask?.tasksUsers.map(tu => tu.user.id) || [];
       const newUserIds = updatedTask.tasksUsers.map(tu => tu.user.id);
       const allUserIds = [...new Set([...previousUserIds, ...newUserIds])];
+      const boardId = updatedTask.board.id;
 
+      // ✨ Notificar a usuarios asignados (para notificaciones personales)
       if (allUserIds.length > 0) {
         allUserIds.forEach(userId => {
           this.boardsWsGateway.notifyTaskUpdate(userId, updatedTask);
         });
         console.log(`📤 Notificación de actualización enviada a ${allUserIds.length} usuarios`);
       }
+
+      // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
+      setTimeout(async () => {
+        await this.boardsWsGateway.notifyBoardChange(boardId);
+        console.log(`🔄 Tablero ${boardId} sincronizado después de actualizar tarea ${id}`);
+      }, 100);
     }
 
     return { message: `Task with id ${id} has been updated.` };
   }
 
-  async createBoardTask(id: number, createTaskDto: CreateTaskDto){
+  async createBoardTask(id: number, createTaskDto: CreateTaskDto) {
     const { userIds, ...task } = createTaskDto;
 
     const newTask = this.taskRepository.create({
-      ...task, 
-      board: {id} 
+      ...task,
+      board: { id }
     });
 
     const savedTask = await this.taskRepository.save(newTask);
 
-    if( userIds && userIds.length > 0 ){
-      const taskUserRelations = userIds.map( userID => {
+    if (userIds && userIds.length > 0) {
+      const taskUserRelations = userIds.map(userID => {
         return this.taskUserRepository.create({
           task: { id: savedTask.id },
           user: { id: userID }
@@ -221,27 +232,36 @@ export class BoardsService {
       await this.taskUserRepository.save(taskUserRelations);
     }
 
-   
     const completeTask = await this.taskRepository.findOne({
       where: { id: savedTask.id },
       relations: ['tasksUsers', 'tasksUsers.user', 'board', 'board.area', 'taskStatus'],
     });
 
-    
-    if (completeTask && userIds && userIds.length > 0) {
-      this.boardsWsGateway.notifyNewTask(userIds, completeTask);
-      console.log(`📤 Notificación de nueva tarea enviada a ${userIds.length} usuarios`);
+    if (completeTask) {
+      const boardId = completeTask.board.id;
+
+      // ✨ Notificar a usuarios asignados (para notificaciones personales)
+      if (userIds && userIds.length > 0) {
+        this.boardsWsGateway.notifyNewTask(userIds, completeTask);
+        console.log(`📤 Notificación de nueva tarea enviada a ${userIds.length} usuarios`);
+      }
+
+      // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
+      setTimeout(async () => {
+        await this.boardsWsGateway.notifyBoardChange(boardId);
+        console.log(`🔄 Tablero ${boardId} sincronizado después de crear tarea ${savedTask.id}`);
+      }, 100);
     }
 
     return { board: id, savedTask, userIds };
   }
 
-  async getAllAreas(){
+  async getAllAreas() {
     const areas = await this.areaRepository.find();
     return areas;
   }
 
-  async getBoardsByArea(areaId: number){
+  async getBoardsByArea(areaId: number) {
     return this.boardRepository.find({
       where: {
         isActive: true,
@@ -253,7 +273,7 @@ export class BoardsService {
 
   async getUpcomingTasksByDueDate() {
     const now = new Date();
-    console.log("hoy es:" ,now)
+    console.log("hoy es:", now)
     const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
     return this.taskRepository.find({
