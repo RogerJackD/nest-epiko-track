@@ -2,7 +2,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { Between, Repository } from 'typeorm';
+import { Between, LessThan, Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskUser } from './entities/task-user.entity';
@@ -279,6 +279,20 @@ export class BoardsService {
     return this.taskRepository.find({
       where: {
         dueDate: Between(now, next24Hours),
+      },
+      relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user', 'board.area'],
+      order: {
+        dueDate: 'ASC',
+      },
+    });
+  }
+
+  // tareas ya vencidas segun fecha actual de la base de datos
+  async getOverdueTasksByDueDate() {
+    const now = new Date();
+    return this.taskRepository.find({
+      where: {
+        dueDate: LessThan(now),
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user', 'board.area'],
       order: {
