@@ -6,6 +6,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { GetUser } from './decorators/get-user.decorator';
 import { User } from './entities/auth.entity';
 import { Auth } from './decorators/auth.decorator';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,11 +28,17 @@ export class AuthController {
   findOneUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.authService.findOneUser(id);
   }
-
+  
+  @Patch('user/change-password/:id')
+  changePassword(@Param('id', ParseUUIDPipe) id: string, @Body() changePasswordDto: ChangePasswordDto) {
+    return this.authService.changePassword(id, changePasswordDto);
+  }
+  
   @Patch('users/:id')
   updateUser(@Param('id', ParseUUIDPipe) id: string, @Body() updateAuthDto: UpdateUserDto) {
     return this.authService.updateUser(id, updateAuthDto);
   }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

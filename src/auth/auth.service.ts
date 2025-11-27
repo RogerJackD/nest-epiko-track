@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -63,6 +64,29 @@ export class AuthService {
     };
   }
 
+  async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
+    const { newPassword, currentPassword } = changePasswordDto;
+    
+    //sekecionar password en consulta
+
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: { id: true, password: true },
+    });
+    console.log(user)
+    if (!user) {
+      throw new BadRequestException(`User with id ${id} not found`);
+    }
+    if (user.password !== currentPassword) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+    user.password = newPassword;
+    await this.userRepository.save(user);
+    return {
+      message: 'Password changed successfully',
+      success: true
+    };
+  }
   remove(id: number) {
     return `This action removes a #${id} auth`;
   }
