@@ -48,6 +48,11 @@ export class BoardsController {
     return this.boardsService.getUpcomingTasksByDueDate();
   }
 
+  @Get('tasks/overdue/due-date')
+  getOverdueTasksByDueDate() {
+    return this.boardsService.getOverdueTasksByDueDate();
+  }
+
 
   //todo: Gestion de tareas con board
   @Get(':boardId/tasks')
