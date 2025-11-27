@@ -36,7 +36,7 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   /**
-   * ✨ NUEVO: Evento para suscribirse a un tablero específico
+   *Evento para suscribirse a un tablero específico
    * Los clientes se unen a una sala por boardId para recibir actualizaciones en tiempo real
    */
   @SubscribeMessage('subscribe-board')
@@ -53,24 +53,16 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
       // Unir cliente a la sala del tablero
       client.join(`board-${boardId}`);
 
-      this.logger.log(`Usuario ${userId} se suscribió al tablero ${boardId}`);
 
       // Obtener datos iniciales del tablero
       const boardData = await this.boardsWsService.getBoardWithTasksForSocket(boardId);
-
-      this.logger.log(`📦 Datos del tablero obtenidos:`, JSON.stringify(boardData));
-
-      // ✨ CRÍTICO: Emitir directamente al cliente, no usar return
+      // Emitir directamente al cliente, no usar return
       client.emit('board-data', {
         boardId,
         ...boardData,
         timestamp: new Date().toISOString(),
       });
-
-      this.logger.log(`✅ Datos iniciales enviados al cliente ${client.id} para tablero ${boardId}`);
-
     } catch (error) {
-      this.logger.error(`❌ Error al suscribir al tablero ${boardId}:`, error.message);
       this.logger.error(`Stack trace:`, error.stack);
       
       client.emit('error', {
@@ -81,7 +73,7 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   /**
-   * ✨ NUEVO: Desuscribirse de un tablero
+   * Desuscribirse de un tablero
    */
   @SubscribeMessage('unsubscribe-board')
   handleUnsubscribeBoard(
@@ -108,9 +100,6 @@ export class BoardsWsGateway implements OnGatewayConnection, OnGatewayDisconnect
       client.join(`user-${userId}`);
 
       const tasks = await this.boardsWsService.getUserTasks(userId);
-
-      this.logger.log(`Usuario ${userId} suscrito. Tareas encontradas: ${tasks.length}`);
-
       return {
         event: 'user-tasks',
         data: {

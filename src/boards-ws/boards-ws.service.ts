@@ -84,13 +84,11 @@ export class BoardsWsService {
   }
 
   /**
-   * ✨ NUEVO: Obtener datos del tablero en formato Kanban para WebSocket
+   * Obtener datos del tablero en formato Kanban para WebSocket
    * Replica la estructura de getBoardWithTasks del BoardsService
    */
   async getBoardWithTasksForSocket(boardId: number) {
     try {
-      console.log(`📊 Obteniendo tareas para tablero ${boardId}...`);
-
       const tasks = await this.taskRepository.find({
         where: {
           board: { id: boardId, isActive: true },
@@ -103,14 +101,10 @@ export class BoardsWsService {
         },
       });
 
-      console.log(`📋 Tareas encontradas: ${tasks.length}`);
-
       const board = await this.boardRepository.findOne({
         where: { id: boardId, isActive: true },
         select: ['id', 'title'],
       });
-
-      console.log(`🏢 Tablero encontrado:`, board);
 
       if (!board) {
         throw new Error(`Tablero con ID ${boardId} no encontrado o inactivo`);
@@ -155,12 +149,9 @@ export class BoardsWsService {
         columns,
       };
 
-      console.log(`✅ Resultado generado:`, JSON.stringify(result, null, 2));
-
       return result;
     } catch (error) {
-      console.error(`❌ Error en getBoardWithTasksForSocket para tablero ${boardId}:`, error.message);
-      console.error(`Stack:`, error.stack);
+      console.error(`Error en getBoardWithTasksForSocket para tablero ${boardId}:`, error.message);
       throw error;
     }
   }
