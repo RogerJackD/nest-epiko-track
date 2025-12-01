@@ -52,17 +52,24 @@ export class AuthService {
   }
   
   async updateUser(id: string, updateUserDto: UpdateUserDto) {
-    
-    await this.findOneUser(id);
+  await this.findOneUser(id);
 
-    const { areaId, ...userData } = updateUserDto;
+  const { areaId, ...userData } = updateUserDto;
 
-    await this.userRepository.update(id, {...userData, area: { id: areaId }})
-    return {
-      message: 'Usuario actualizado exitosamente',
-      success: true
-    };
+  const updateData: any = { ...userData };
+  
+  // Solo agregar areaId si viene en el DTO
+  if (areaId !== undefined) {
+    updateData.areaId = areaId;
   }
+
+  await this.userRepository.update(id, updateData);
+  
+  return {
+    message: 'Usuario actualizado exitosamente',
+    success: true
+  };
+}
 
   async changePassword(id: string, changePasswordDto: ChangePasswordDto) {
     const { newPassword, currentPassword } = changePasswordDto;
