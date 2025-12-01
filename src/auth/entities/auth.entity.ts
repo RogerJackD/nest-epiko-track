@@ -85,6 +85,12 @@ export class User {
     @Column({
         type: 'int',
         nullable: true,
+    })
+    areaId: number | null;
+
+    @Column({
+        type: 'int',
+        nullable: true,
         default: 1, 
     })
     roleId: number | null;
