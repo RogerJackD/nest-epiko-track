@@ -3,7 +3,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/auth.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -32,10 +32,16 @@ export class AuthService {
   }
 
   async findAllUsers() {
-    const UsersFound = await this.userRepository.find({
-      relations: ['role', 'area']
-    })
-    return UsersFound;
+    //no retornar usuarios con rol de super-admin
+    const users = await this.userRepository.find({
+      relations: ['role', 'area'],
+      where: {
+        role: {
+          name: In(['user', 'admin', 'manager'])
+        }
+      }
+    });
+    return users;
   }
 
   async findOneUser(id: string) {
