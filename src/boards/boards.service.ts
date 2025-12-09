@@ -1,8 +1,7 @@
-// boards/boards.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { Between, LessThan, Repository } from 'typeorm';
+import { Between, LessThan, Not, Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskUser } from './entities/task-user.entity';
@@ -142,13 +141,11 @@ export class BoardsService {
       // ✨ Notificar eliminación a usuarios asignados (para notificaciones personales)
       if (userIds.length > 0) {
         this.boardsWsGateway.notifyTaskDeleted(userIds, id);
-        console.log(`📤 Notificación de eliminación enviada a ${userIds.length} usuarios`);
       }
 
       // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
       setTimeout(async () => {
         await this.boardsWsGateway.notifyBoardChange(boardId);
-        console.log(`🔄 Tablero ${boardId} sincronizado después de eliminar tarea ${id}`);
       }, 100);
     }
 
@@ -193,7 +190,7 @@ export class BoardsService {
       const allUserIds = [...new Set([...previousUserIds, ...newUserIds])];
       const boardId = updatedTask.board.id;
 
-      // ✨ Notificar a usuarios asignados (para notificaciones personales)
+      //Notificar a usuarios asignados (para notificaciones personales)
       if (allUserIds.length > 0) {
         allUserIds.forEach(userId => {
           this.boardsWsGateway.notifyTaskUpdate(userId, updatedTask);
@@ -201,10 +198,9 @@ export class BoardsService {
         console.log(`📤 Notificación de actualización enviada a ${allUserIds.length} usuarios`);
       }
 
-      // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
+      // Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
       setTimeout(async () => {
         await this.boardsWsGateway.notifyBoardChange(boardId);
-        console.log(`🔄 Tablero ${boardId} sincronizado después de actualizar tarea ${id}`);
       }, 100);
     }
 
@@ -240,16 +236,14 @@ export class BoardsService {
     if (completeTask) {
       const boardId = completeTask.board.id;
 
-      // ✨ Notificar a usuarios asignados (para notificaciones personales)
+      // Notificar a usuarios asignados (para notificaciones personales)
       if (userIds && userIds.length > 0) {
         this.boardsWsGateway.notifyNewTask(userIds, completeTask);
-        console.log(`📤 Notificación de nueva tarea enviada a ${userIds.length} usuarios`);
       }
 
-      // ✨ CRÍTICO: Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
+      //Usar setTimeout para asegurar que el evento se emita DESPUÉS de la respuesta HTTP
       setTimeout(async () => {
         await this.boardsWsGateway.notifyBoardChange(boardId);
-        console.log(`🔄 Tablero ${boardId} sincronizado después de crear tarea ${savedTask.id}`);
       }, 100);
     }
 
@@ -287,12 +281,13 @@ export class BoardsService {
     });
   }
 
-  // tareas ya vencidas segun fecha actual de la base de datos
+  // tareas ya vencidas segun fecha actual de la base de datos que no estan en estado completado
   async getOverdueTasksByDueDate() {
     const now = new Date();
     return this.taskRepository.find({
       where: {
         dueDate: LessThan(now),
+        taskStatus: { title: Not('Completado') },
       },
       relations: ['taskStatus', 'board', 'tasksUsers', 'tasksUsers.user', 'board.area'],
       order: {

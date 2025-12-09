@@ -112,9 +112,13 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { id: true, email: true, password: true, firstName: true, lastName: true},
+      select: { id: true, email: true, password: true, firstName: true, lastName: true, status: true},
       relations: ['role', 'area'],
     });
+
+    //user con status inactive no puede loguearse
+    if( user && user['status'] === false )
+      throw new UnauthorizedException('User is inactive, please contact admin');
 
     if( !user )
       throw new UnauthorizedException('Credentials are not valid (email)');
