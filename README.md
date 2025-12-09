@@ -67,11 +67,11 @@ INSERT INTO "public"."task_status" ("id", "title", "description", "sort_order") 
 ````
 datos de prueba crear usuarios(con 4 roles diferentes):
 ````
-INSERT INTO "public"."user" ("id", "firstName", "lastName", "age", "email", "createdAt", "updatedAt", "contractDate", "password", "status", "job_title", "phoneNumber", "address", "roleId", "fullName_normalized", "areaId") VALUES
-('9c973e91-dd95-44d0-8551-7c9eeee330b0', 'user', 'test', 34, 'user@gmail.com', '2025-11-19 23:00:58.469688', '2025-12-05 01:21:02.689247', '2025-06-12', 'Password123', 't', 'dev frontend', '980124453', 'Peru', 1, 'undefined undefined', 1),
-('af9d1b46-3ec1-4d77-9829-704a362051f9', 'super admin', 'test', 22, 'superadmin@gmail.com', '2025-11-09 01:43:23.630453', '2025-11-15 22:20:44.187386', '2025-06-12', 'Password123', 't', 'dev backend', '980104900', 'Tacna', 4, 'roger_jack', 2),
-('af9d1b46-3ec1-4d77-9829-704a362058f0', 'admin', 'test', 22, 'admin@gmail.com', '2025-11-09 01:43:23.630453', '2025-11-15 22:20:44.187386', '2025-06-12', 'Password123', 't', 'adminstrador', '980104953', 'Tacna', 2, 'admin_test', 2),
-('af9d1b46-3ec1-4d77-9829-704a362058f2', 'manager', 'test', 22, 'manager@gmail.com', '2025-11-09 01:43:23.630453', '2025-11-15 22:20:44.187386', '2025-06-12', 'Password123', 't', 'proyect manager', '980104918', 'Tacna', 3, 'roger_roger', 1);
+INSERT INTO "public"."user" ("id", "firstName", "lastName", "age", "email", "createdAt", "updatedAt", "contractDate", "password", "status", "job_title", "phoneNumber", "address", "areaId", "roleId", "fullName_normalized") VALUES
+('af9d1b46-3ec1-4d77-9829-704a362058f2', 'manager', 'test', 22, 'manager@gmail.com', '2025-11-09 01:43:23.630453', '2025-12-09 01:01:40.600419', '2025-06-12', 'Password123', 't', 'proyect manager', '980104918', 'Peru', 1, 3, 'manager_test'),
+('af9d1b46-3ec1-4d77-9829-704a362058f0', 'admin', 'test', 22, 'admin@gmail.com', '2025-11-09 01:43:23.630453', '2025-11-15 22:20:44.187386', '2025-06-12', 'Password123', 't', 'adminstrador', '980104953', 'Peru', 2, 2, 'admin_test'),
+('af9d1b46-3ec1-4d77-9829-704a362051f9', 'super admin', 'test', 22, 'superadmin@gmail.com', '2025-11-09 01:43:23.630453', '2025-11-15 22:20:44.187386', '2025-06-12', 'Password123', 't', 'dev backend', '980104900', 'Peru', 2, 4, 'superadmin_test'),
+('9c973e91-dd95-44d0-8551-7c9eeee330b0', 'user', 'test', 34, 'user@gmail.com', '2025-11-19 23:00:58.469688', '2025-12-05 01:21:02.689247', '2025-06-12', 'Password123', 't', 'dev frontend', '980124453', 'Peru', 1, 1, 'user_test');
 ````
 
 ## PUERTO API:
