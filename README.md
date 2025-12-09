@@ -27,7 +27,7 @@ docker-compose up -d
 Para tener construida la esctructura de la base de datos activar "synchronize: true" en el archivo app.module.ts - solo en desarrollo  
 --ubicación de archivo src/app.module.ts
 ````
-synchronize: false 
+synchronize: true 
 ````
 #ejecutar backend:
 las migraciones o la estructura de la database se ejecutaran automaticamente:
