@@ -20,6 +20,9 @@ import { BoardsWsModule } from './boards-ws/boards-ws.module';
 
             autoLoadEntities: true,
             synchronize: true,
+         ssl: {
+           rejectUnauthorized: false,
+         },
         }),
         BoardsModule,
         AuthModule,
