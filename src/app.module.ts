@@ -19,7 +19,7 @@ import { BoardsWsModule } from './boards-ws/boards-ws.module';
             database: process.env.DB_NAME,
 
             autoLoadEntities: true,
-            synchronize: false,
+            synchronize: true,
         }),
         BoardsModule,
         AuthModule,
